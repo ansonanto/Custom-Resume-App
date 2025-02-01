@@ -22,7 +22,8 @@ def check_dependencies():
 
 check_dependencies()
 
-# Streamlit UI
+# Configure page layout
+st.set_page_config(layout="wide")
 
 def main():
     st.title("Resume Customization for ML Roles")
@@ -48,6 +49,7 @@ def main():
                 resume_text = "\n".join(
                     page.get_text("text") for page in doc
                 )
+            st.write("Resume processed successfully. Ready to customize!")
         except Exception as e:
             st.error(f"Error processing resume with Fitz: {str(e)}")
 
@@ -55,39 +57,14 @@ def main():
     if "default_base_prompt" not in st.session_state:
         st.session_state["default_base_prompt"] = (
             """
-Act as a resume strategist specializing in machine learning roles. Customize my resume for the {job_title} role at {company_name}. Follow these steps:
-
-Step 1: Job Description Analysis
-Hard Skills: Identify the top 5 technical requirements (e.g., NLP, AWS, PyTorch, MLOps, RAG).
-
-Implicit Needs: Extract 2-3 hidden priorities (e.g., "collaborate with cross-functional teams" = highlight Institute for Experiential AI leadership).
-
-Keywords: List 8-10 exact terms from the JD (e.g., "real-time analytics," "multi-modal AI," "model optimization").
-
-Step 2: Resume Customization Rules
-A. Summary:
-Start with "Machine Learning Professional with 4+ years in [JD-relevant field: NLP/Healthcare AI/MLOps]" and include 3 keywords from the JD (e.g., "LLM optimization," "scalable RAG," "applied research").
-
-B. Experience Section:
-Prioritize relevant experience per JD requirements and rewrite using precise wording from JD.
-Metrics: Ensure 80% of bullets include numbers (e.g., "Improved document relevance +30%").
-
-C. Publications & Skills:
-Prioritize relevant publications and reorder skills based on JD emphasis.
-
-D. ATS Fixes:
-Ensure proper formatting for LinkedIn/GitHub links and use standard headers.
-
-Step 3: Unique Value Proposition (UVP)
-Highlight a key accomplishment that integrates research and industry impact.
-
-Input Data:
-My Resume: {resume_text}
-Job Description: {job_description}
-
-Output Format:
-Revised Resume with bolded JD keywords (remove bolding later).
-"""
+Act as a resume strategist specializing in machine learning roles. 
+Customize my resume for the {job_title} role at {company_name}. Follow these steps:\n\nStep 1: Job Description Analysis\nHard Skills: Identify the top 5 technical requirements 
+(e.g., NLP, AWS, PyTorch, MLOps, RAG).\n\nImplicit Needs: Extract 2-3 hidden priorities (e.g., \"collaborate with cross-functional teams\" = highlight Institute for Experiential 
+AI leadership).\n\nKeywords: List 8-10 exact terms from the JD (e.g., \"real-time analytics,\" \"multi-modal AI,\" \"model optimization\").\n\nStep 2: Resume Customization Rules\nA. 
+Summary:\nStart with \"Machine Learning Professional with 4+ years in [JD-relevant field: NLP/Healthcare AI/MLOps]\" and include 3 keywords from the JD (e.g., \"LLM optimization,\" \"scalable RAG,\" \"applied research\").\n\nB. 
+Experience Section:\nPrioritize relevant experience per JD requirements and rewrite using precise wording from JD.
+\nMetrics: Ensure 80% of bullets include numbers (e.g., \"Improved document relevance +30%\").\n\nC. Publications & Skills:\nPrioritize relevant publications and reorder skills based on JD emphasis.\n\nD. ATS Fixes:\nEnsure proper formatting for LinkedIn/GitHub links and use standard headers.\n\nStep 3: Unique Value Proposition (UVP)
+\nHighlight a key accomplishment that integrates research and industry impact.\n\nInput Data:\nMy Resume: {resume_text}\nJob Description: {job_description}\n\nOutput Format:\nOutput Format:Revised Resume in text format, make sure to remove all bolding, filler words and cliche words.\n"""
         )
 
     if "final_base_prompt" not in st.session_state:
@@ -199,15 +176,31 @@ Additional Instructions:
         if not resume_text:
             st.error("Please upload your resume before generating the customized version.")
             return
+        
+        # Final check: if the user never edited or processed the base prompt, we still auto-format placeholders
+        if st.session_state.get("final_base_prompt"):
+            final_prompt = st.session_state["final_base_prompt"]
+        else:
+            # Attempt to auto-populate placeholders in the default prompt
+            try:
+                final_prompt = st.session_state["default_base_prompt"].format(
+                    job_title=job_title,
+                    company_name=company_name,
+                    job_description=job_description,
+                    resume_text=resume_text
+                )
+            except KeyError:
+                # if placeholders missing from the string, fallback
+                final_prompt = st.session_state["default_base_prompt"]
 
         openai_client = openai.OpenAI(api_key=openai_api_key)
         try:
             response = openai_client.chat.completions.create(
                 model="gpt-4o",
-                messages=[{"role": "system", "content": base_prompt}],
+                messages=[{"role": "system", "content": final_prompt}],
             )
             st.subheader("Customized Resume:")
-            st.text_area("", response.choices[0].message.content, height=500)
+            st.text_area("Generated Content:", response.choices[0].message.content, height=500)
         except Exception as e:
             st.error(f"Error generating response: {str(e)}")
 
