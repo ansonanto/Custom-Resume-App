@@ -58,13 +58,47 @@ def main():
         st.session_state["default_base_prompt"] = (
             """
 Act as a resume strategist specializing in machine learning roles. 
-Customize my resume for the {job_title} role at {company_name}. Follow these steps:\n\nStep 1: Job Description Analysis\nHard Skills: Identify the top 5 technical requirements 
-(e.g., NLP, AWS, PyTorch, MLOps, RAG).\n\nImplicit Needs: Extract 2-3 hidden priorities (e.g., \"collaborate with cross-functional teams\" = highlight Institute for Experiential 
-AI leadership).\n\nKeywords: List 8-10 exact terms from the JD (e.g., \"real-time analytics,\" \"multi-modal AI,\" \"model optimization\").\n\nStep 2: Resume Customization Rules\nA. 
-Summary:\nStart with \"Machine Learning Professional with 4+ years in [JD-relevant field: NLP/Healthcare AI/MLOps]\" and include 3 keywords from the JD (e.g., \"LLM optimization,\" \"scalable RAG,\" \"applied research\").\n\nB. 
-Experience Section:\nPrioritize relevant experience per JD requirements and rewrite using precise wording from JD.
-\nMetrics: Ensure 80% of bullets include numbers (e.g., \"Improved document relevance +30%\").\n\nC. Publications & Skills:\nPrioritize relevant publications and reorder skills based on JD emphasis.\n\nD. ATS Fixes:\nEnsure proper formatting for LinkedIn/GitHub links and use standard headers.\n\nStep 3: Unique Value Proposition (UVP)
-\nHighlight a key accomplishment that integrates research and industry impact.\n\nInput Data:\nMy Resume: {resume_text}\nJob Description: {job_description}\n\nOutput Format:\nOutput Format:Revised Resume in text format, make sure to remove all bolding, filler words and cliche words.\n"""
+Customize my resume for the {job_title} role at {company_name}. 
+Please ensure the final resume fully integrates the main responsibilities and 
+qualifications from the job description. Follow these steps:
+
+Step 1: Job Description Analysis
+- Identify the top 5 technical requirements (e.g., NLP, AWS, PyTorch, MLOps, RAG).
+- Extract 2-3 hidden priorities (e.g., “collaborate with cross-functional teams” = highlight Institute for Experiential AI leadership).
+- List 8-10 exact terms from the JD (e.g., “real-time analytics,” “multi-modal AI,” “model optimization”).
+
+Step 2: Resume Customization Rules
+
+A. Summary:
+- Start with “Machine Learning Professional with 4+ years in [JD-relevant field: NLP/Healthcare AI/MLOps]” and include at least 3 keywords from the JD (e.g., “LLM optimization,” “scalable RAG,” “applied research”).
+
+B. Experience Section:
+- Use precise wording from the JD. 
+- Prioritize responsibilities and achievements that align with the JD’s main requirements.
+- Include metrics (80% of bullets): e.g., “Improved document relevance +30%.”
+- If the JD emphasizes certain tasks or outcomes (e.g., real-time analytics, resource optimization), integrate these details into the bullet points.
+
+C. Publications & Skills:
+- Retain or emphasize relevant publications, especially if they align with the JD’s focus areas.
+- Reorder technical skills based on the JD (most critical first).
+- Check for missing skills or tools mentioned in the JD and add them where appropriate.
+
+D. ATS Fixes:
+- Ensure proper formatting for LinkedIn/GitHub links (e.g., “LinkedIn: [link], GitHub: [link]”) 
+- Use standard headings (e.g., “Work Experience,” “Skills”).
+
+Step 3: Unique Value Proposition (UVP):
+- Highlight a key accomplishment that integrates both research and industry impact.
+
+Input Data:
+- My Resume: {resume_text}
+- Job Description: {job_description}
+
+Output Format:
+- Revised Resume in plain text format.
+- Remove all bolding and generic/cliché filler words (e.g., “detail-oriented,” “passionate,” etc.).
+- Incorporate the most relevant skills, responsibilities, and keywords from the JD throughout the resume.
+"""
         )
 
     if "final_base_prompt" not in st.session_state:
